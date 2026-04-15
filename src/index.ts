@@ -377,6 +377,9 @@ export const runSteps = async ({
     logger.debug(
       `Using model: ${getModelId("stepExecution")} for step execution / gateway: ${getConfig().ai?.gateway ?? "none"}`,
     );
+    console.log(
+      `Using model: ${getModelId("stepExecution")} for step execution / gateway: ${getConfig().ai?.gateway ?? "none"}`,
+    );
 
     try {
       const result = await maybeWithSpan(
@@ -397,6 +400,12 @@ export const runSteps = async ({
               openrouter: {
                 reasoning: {
                   effort: "medium",
+                },
+              },
+              cloudflare: {
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingLevel: "medium",
                 },
               },
             },
