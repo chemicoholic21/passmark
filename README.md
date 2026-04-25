@@ -135,7 +135,7 @@ test("Shopping cart tests", async ({ page }) => {
 
 Notes:
 
-- CUA mode uses OpenAI's `gpt-5.5` + built-in `computer` tool. Override with `configure({ ai: { models: { cua: "..." } } })`.
+- CUA mode uses OpenAI's `gpt-5.5` + built-in `computer` tool.
 - Redis step caching is skipped in CUA mode because coordinate actions aren't portable across viewport sizes.
 - `gateway: "vercel" | "openrouter" | "cloudflare"` is not compatible with CUA — the Responses-API `computer` tool is only exposed on direct OpenAI access.
 - Account requirements: your OpenAI API key must have access to the CUA model and the built-in `computer` tool on the Responses API.
