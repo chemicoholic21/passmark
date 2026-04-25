@@ -114,15 +114,15 @@ configure({
 });
 ```
 
-Set `OPENAI_API_KEY` in your `.env`. Because CUA sees only the page screenshot (there is no browser address bar in the screenshot), use Playwright's `page.goto()` to land on the starting URL before calling `runSteps()`:
+Set `OPENAI_API_KEY` in your `.env`. Then you can write tests like this:
 
 ```typescript
 test("Shopping cart tests", async ({ page }) => {
-  await page.goto("https://demo.vercel.store");
   await runSteps({
     page,
     userFlow: "Add product to cart",
     steps: [
+      { description: "Navigate to https://demo.vercel.store" },
       { description: "Click Acme Circles T-Shirt" },
       { description: "Select color", data: { value: "White" } },
       { description: "Add to cart", waitUntil: "My Cart is visible" },
@@ -135,7 +135,7 @@ test("Shopping cart tests", async ({ page }) => {
 
 Notes:
 
-- CUA mode uses OpenAI's `gpt-5.4` + built-in `computer` tool. Override with `configure({ ai: { models: { cua: "..." } } })`.
+- CUA mode uses OpenAI's `gpt-5.5` + built-in `computer` tool. Override with `configure({ ai: { models: { cua: "..." } } })`.
 - Redis step caching is skipped in CUA mode because coordinate actions aren't portable across viewport sizes.
 - `gateway: "vercel" | "openrouter" | "cloudflare"` is not compatible with CUA — the Responses-API `computer` tool is only exposed on direct OpenAI access.
 - Account requirements: your OpenAI API key must have access to the CUA model and the built-in `computer` tool on the Responses API.
@@ -251,7 +251,7 @@ All models are configurable via `configure({ ai: { models: { ... } } })`:
 | `assertionSecondary` | `google/gemini-3-flash` | Secondary assertion model (Gemini) |
 | `assertionArbiter` | `google/gemini-3.1-pro-preview` | Arbiter for assertion disagreements |
 | `utility` | `google/gemini-2.5-flash` | Data extraction, wait conditions |
-| `cua` | `gpt-5.4` | CUA mode — OpenAI Responses API with the built-in `computer` tool |
+| `cua` | `gpt-5.5` | CUA mode — OpenAI Responses API with the built-in `computer` tool |
 
 ## Caching
 

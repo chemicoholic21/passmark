@@ -36,7 +36,7 @@ export type ModelConfig = {
   utility?: string;
   /**
    * Model for CUA mode (OpenAI Responses API + built-in `computer` tool).
-   * Locked to "gpt-5.4" — passing this field to `configure()` currently throws.
+   * Locked to "gpt-5.5" — passing this field to `configure()` currently throws.
    * Override may be re-enabled in a future release.
    */
   cua?: string;

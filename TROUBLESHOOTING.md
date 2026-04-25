@@ -101,8 +101,7 @@ Fix:
 - **"CUA mode requires gateway: 'none'"** — CUA doesn't work through Vercel / OpenRouter / Cloudflare gateways (the Responses-API `computer` tool is only available on direct OpenAI access). Use `configure({ ai: { mode: "cua", gateway: "none" } })`.
 - **"OPENAI_API_KEY isn't set"** — add `OPENAI_API_KEY` to your environment / `.env`.
 - **Generic 400 with `param: null` in the error body** — your OpenAI API key likely doesn't have access to the CUA model or the built-in `computer` tool on the Responses API. Verify access at https://platform.openai.com/settings/organization/limits.
-- **"Tool 'computer_use_preview' is not supported with gpt-5.4"** — you're on an old build. In the current API, `gpt-5.4` uses the new simpler tool shape `{ type: "computer" }`, not the legacy `computer_use_preview`. Rebuild from `main`.
-- **Model can't complete a "Navigate to URL" step** — CUA has no browser chrome / address bar in its screenshot view, so it cannot type a URL. Use Playwright's `await page.goto(url)` before calling `runSteps()`.
+- **"Tool 'computer_use_preview' is not supported with gpt-5.5"** — you're on an old build. In the current API, `gpt-5.5` uses the new simpler tool shape `{ type: "computer" }`, not the legacy `computer_use_preview`. Rebuild from `main`.
 
 ### 8) Enable debug logs
 

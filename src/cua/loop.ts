@@ -78,7 +78,7 @@ export async function runCUALoop({
   const openai = (client ?? getOpenAIClient()) as OpenAIWithResponses;
   const model = getModelId("cua");
 
-  // Current (2026) API: gpt-5.4 uses the simpler `{ type: "computer" }` tool.
+  // Current (2026) API: gpt-5.5 uses the simpler `{ type: "computer" }` tool.
   // The model infers display dimensions from the screenshots it receives, so
   // no display_width/display_height/environment are sent in the tool spec.
   // (The legacy `computer_use_preview` tool + `computer-use-preview` model is
