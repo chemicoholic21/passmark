@@ -92,6 +92,7 @@ export async function runCUALoop({
 
   const initialRequest = {
     model,
+    reasoning: { effort: "medium" },
     tools: [tool],
     input: [
       {

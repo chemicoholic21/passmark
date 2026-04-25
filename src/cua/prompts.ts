@@ -19,7 +19,7 @@ export const buildRunStepsPromptCUA = ({
   stepIndex: number;
 }): string => {
   return `
-You are an expert QA agent testing a web application using OpenAI's computer-use capabilities. You see the browser as screenshots and act by clicking, typing, scrolling, etc.
+You are an expert QA agent testing a web application using computer-use capabilities. You see the browser as screenshots and act by clicking, typing, scrolling, etc.
 
 <UserFlow>
 ${userFlow}
@@ -35,38 +35,37 @@ ${step.description}
 Current Step Index: ${stepIndex + 1} out of ${steps.length} steps.
 </StepIndex>
 
-${
-  stepIndex + 1 < steps.length
-    ? `<NextStep>
+${stepIndex + 1 < steps.length
+      ? `<NextStep>
 (For context only — DO NOT execute.) Next step: "${steps[stepIndex + 1].description}"
 </NextStep>`
-    : ""
-}
+      : ""
+    }
 
-${
-  step.data
-    ? `<Data>
+${step.data
+      ? `<Data>
 Use this data for the current step: ${JSON.stringify(step.data)}
 </Data>`
-    : ""
-}
+      : ""
+    }
 
-${
-  auth
-    ? `<Auth>
+${auth
+      ? `<Auth>
 If a login screen appears, use:
 - Email: ${auth.email}
 - Password: ${auth.password}
 </Auth>`
-    : ""
-}
+      : ""
+    }
 
 <Instructions>
 - Look at the current screenshot before acting. If the page is still loading, use the wait action.
 - Perform only the current step. Stop as soon as the expected result is visible in the screenshot.
-- If the step fails or produces a validation error, correct the input and retry once.
+- If the step fails or produces a validation error, correct the input and retry.
 - Do not navigate to a new URL unless the step description explicitly says to.
 - Keep individual action batches small so the screenshot loop can verify progress.
+- If you see any unexpected pop-ups or modals, try to close them before proceeding.
+- After you execute the step, analyze the returned screenshot. The step execution is considered successful only if the latest screenshot reflects the expected state after performing the step. If it doesn't, you must take a fresh screenshot and retry executing the step until the expected state is achieved.
 </Instructions>
 `.trim();
 };
@@ -80,25 +79,23 @@ export const buildRunUserFlowPromptCUA = ({
   assertion,
 }: Pick<UserFlowOptions, "userFlow" | "assertion" | "steps">): string => {
   return `
-You are an expert QA agent testing a web application using OpenAI's computer-use capabilities. You see the browser as screenshots and act by clicking, typing, scrolling, etc.
+You are an expert QA agent testing a web application using computer-use capabilities. You see the browser as screenshots and act by clicking, typing, scrolling, etc.
 
 <UserFlow>
 ${userFlow}
 </UserFlow>
 
-${
-  steps
-    ? `<Steps>
+${steps
+      ? `<Steps>
 Follow these steps in order:
 ${steps}
 Stop once all steps are complete.
 </Steps>`
-    : ""
-}
+      : ""
+    }
 
-${
-  assertion
-    ? `<Assertion>
+${assertion
+      ? `<Assertion>
 ${assertion}
 </Assertion>
 
@@ -106,8 +103,8 @@ When the flow is complete, evaluate the assertion and report:
 - assertionPassed: boolean
 - confidenceScore: 0-100
 - reasoning: short explanation`
-    : ""
-}
+      : ""
+    }
 
 <Instructions>
 - Inspect each screenshot before acting.
