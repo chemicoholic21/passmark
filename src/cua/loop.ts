@@ -110,16 +110,16 @@ export async function runCUALoop({
     const e = err as OpenAIErrorLike;
     logger.error(
       `[cua] initial request failed: status=${e?.status ?? "?"} msg=${e?.message ?? err} ` +
-        `model=${model} tool=${JSON.stringify(tool)} ` +
-        `body=${JSON.stringify(e?.error ?? e?.response?.data ?? e?.body ?? {})}`,
+      `model=${model} tool=${JSON.stringify(tool)} ` +
+      `body=${JSON.stringify(e?.error ?? e?.response?.data ?? e?.body ?? {})}`,
     );
     // A generic 400 with no `param` usually means the account lacks access to
     // the CUA model or to the built-in `computer` tool on the Responses API.
     if (e?.status === 400) {
       logger.error(
         `[cua] if no "param" detail is shown above, verify your OpenAI API key has access to "${model}" ` +
-          `and the built-in "computer" tool on the Responses API ` +
-          `(https://platform.openai.com/settings/organization/limits).`,
+        `and the built-in "computer" tool on the Responses API ` +
+        `(https://platform.openai.com/settings/organization/limits).`,
       );
     }
     throw err;
@@ -138,7 +138,7 @@ export async function runCUALoop({
       return extractFinalText(response);
     }
 
-    const actions = extractActions(call);
+    const actions = rewriteAddressBarNavigation(extractActions(call));
     for (const action of actions) {
       if (abortSignal?.aborted) throw new Error("CUA loop aborted");
       await executeAction(page, action);
@@ -213,6 +213,50 @@ function extractActions(call: CUAOutputItem): ComputerAction[] {
   if (Array.isArray(call.actions)) return call.actions;
   if (call.action) return [call.action];
   return [];
+}
+
+/**
+ * The CUA model often "navigates" by simulating the browser's address-bar
+ * shortcut: keypress(Ctrl/Cmd+L) → type(url) → keypress(Enter). Playwright
+ * drives the page directly and has no browser chrome, so those keypresses
+ * are no-ops and navigation never happens. Detect that 3-action pattern and
+ * collapse it into a single `goto` that uses page.goto() under the hood.
+ */
+function rewriteAddressBarNavigation(actions: ComputerAction[]): ComputerAction[] {
+  const result: ComputerAction[] = [];
+  for (let i = 0; i < actions.length; i++) {
+    const a = actions[i];
+    const b = actions[i + 1];
+    const c = actions[i + 2];
+    if (isAddressBarFocus(a) && isUrlType(b) && isEnter(c)) {
+      const url = (b as { text: string }).text.trim();
+      result.push({ type: "goto", url });
+      logger.debug(`[cua] rewrote address-bar navigation pattern → goto ${url}`);
+      i += 2;
+      continue;
+    }
+    result.push(a);
+  }
+  return result;
+}
+
+function isAddressBarFocus(action: ComputerAction | undefined): boolean {
+  if (!action || action.type !== "keypress") return false;
+  const keys = ((action as { keys?: string[] }).keys ?? []).map((k) => k.toUpperCase());
+  if (keys.length !== 2 || !keys.includes("L")) return false;
+  return keys.some((k) => k === "CTRL" || k === "CONTROL" || k === "META" || k === "CMD" || k === "COMMAND");
+}
+
+function isUrlType(action: ComputerAction | undefined): boolean {
+  if (!action || action.type !== "type") return false;
+  const text = (action as { text?: string }).text;
+  return typeof text === "string" && /^https?:\/\//i.test(text.trim());
+}
+
+function isEnter(action: ComputerAction | undefined): boolean {
+  if (!action || action.type !== "keypress") return false;
+  const keys = ((action as { keys?: string[] }).keys ?? []).map((k) => k.toUpperCase());
+  return keys.length === 1 && (keys[0] === "ENTER" || keys[0] === "RETURN");
 }
 
 function emitReasoning(response: CUAResponse, onReasoning?: (r: string) => void) {

@@ -16,6 +16,7 @@ export type ComputerAction =
   | { type: "keypress"; keys: string[] }
   | { type: "screenshot" }
   | { type: "wait" }
+  | { type: "goto"; url: string }
   | { type: string; [k: string]: unknown };
 
 /**
@@ -140,6 +141,11 @@ export async function executeAction(page: Page, action: ComputerAction): Promise
     case "wait":
       await page.waitForTimeout(1000);
       return;
+    case "goto": {
+      const { url } = action as { url: string };
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      return;
+    }
     default:
       logger.warn(`[cua] Unknown action type "${action.type}" — skipping.`);
       return;

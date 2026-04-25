@@ -26,8 +26,11 @@ describe("cua config", () => {
     expect(DEFAULT_MODELS.cua).toBe("gpt-5.4");
   });
 
-  it("user can override cua model id", () => {
-    configure({ ai: { models: { cua: "custom-cua-model" } } });
-    expect(getModelId("cua")).toBe("custom-cua-model");
+  it("configure throws when user tries to override cua model", () => {
+    expect(() =>
+      configure({ ai: { models: { cua: "custom-cua-model" } } }),
+    ).toThrow(/cua.*not user-configurable/);
+    // Default still wins.
+    expect(getModelId("cua")).toBe("gpt-5.4");
   });
 });

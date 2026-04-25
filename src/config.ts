@@ -34,7 +34,11 @@ export type ModelConfig = {
   assertionArbiter?: string;
   /** Model for data extraction, wait conditions, and lightweight tasks. Default: google/gemini-2.5-flash */
   utility?: string;
-  /** Model for CUA mode (OpenAI Responses API + built-in `computer` tool). Default: gpt-5.4 */
+  /**
+   * Model for CUA mode (OpenAI Responses API + built-in `computer` tool).
+   * Locked to "gpt-5.4" — passing this field to `configure()` currently throws.
+   * Override may be re-enabled in a future release.
+   */
   cua?: string;
 };
 
@@ -77,6 +81,12 @@ let globalConfig: Config = {};
  * ```
  */
 export function configure(config: Config) {
+  if (config.ai?.models?.cua !== undefined) {
+    throw new Error(
+      `[passmark] ai.models.cua is not user-configurable — CUA mode is locked to "${DEFAULT_MODELS.cua}". ` +
+        `Remove the "cua" field from configure({ ai: { models } }).`,
+    );
+  }
   globalConfig = { ...globalConfig, ...config };
 }
 
