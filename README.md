@@ -99,6 +99,47 @@ npx playwright test example.spec.ts --project chromium
 
 After the test completes, you can run `npx playwright show-report` to see a detailed report of the test execution, including an AI summary at the top, provided by Passmark.
 
+### Using CUA mode (OpenAI computer-use agent)
+
+By default Passmark uses ARIA accessibility snapshots. For visual, screenshot-driven automation via OpenAI's computer-use agent, opt in with `mode: "cua"`:
+
+```typescript
+import { configure } from "passmark";
+
+configure({
+  ai: {
+    mode: "cua",
+    gateway: "none", // CUA requires direct OpenAI access
+  },
+});
+```
+
+Set `OPENAI_API_KEY` in your `.env`. Then you can write tests like this:
+
+```typescript
+test("Shopping cart tests", async ({ page }) => {
+  await runSteps({
+    page,
+    userFlow: "Add product to cart",
+    steps: [
+      { description: "Navigate to https://demo.vercel.store" },
+      { description: "Click Acme Circles T-Shirt" },
+      { description: "Select color", data: { value: "White" } },
+      { description: "Add to cart", waitUntil: "My Cart is visible" },
+    ],
+    test,
+    expect,
+  });
+});
+```
+
+Notes:
+
+- CUA mode uses OpenAI's `gpt-5.5` + built-in `computer` tool. Override with `configure({ ai: { models: { cua: "..." } } })`.
+- Redis step caching is skipped in CUA mode because coordinate actions aren't portable across viewport sizes.
+- `gateway: "vercel" | "openrouter" | "cloudflare"` is not compatible with CUA — the Responses-API `computer` tool is only exposed on direct OpenAI access.
+- Account requirements: your OpenAI API key must have access to the CUA model and the built-in `computer` tool on the Responses API.
+
 ## Features
 
 - **Core Execution** — `runSteps()` and `runUserFlow()` for flexible test orchestration in natural language, with smart caching and auto-healing
@@ -192,6 +233,7 @@ configure({
 | `CLOUDFLARE_ACCOUNT_ID` | If gateway=cloudflare | - | Cloudflare account ID that owns the AI Gateway |
 | `CLOUDFLARE_AI_GATEWAY` | If gateway=cloudflare | - | Cloudflare AI Gateway name (slug) |
 | `CLOUDFLARE_AI_GATEWAY_API_KEY` | If gateway=cloudflare and the gateway is authenticated | - | Cloudflare AI Gateway token (sent as `cf-aig-authorization`) |
+| `OPENAI_API_KEY` | If mode=cua | - | OpenAI API key (required for CUA mode; must have Responses-API `computer` tool access) |
 | `AXIOM_TOKEN` | No | - | Axiom token for OpenTelemetry tracing |
 | `AXIOM_DATASET` | No | - | Axiom dataset for trace storage |
 | `PASSMARK_LOG_LEVEL` | No | `info` | Log level: `debug`, `info`, `warn`, `error`, `silent` |
@@ -209,6 +251,7 @@ All models are configurable via `configure({ ai: { models: { ... } } })`:
 | `assertionSecondary` | `google/gemini-3-flash` | Secondary assertion model (Gemini) |
 | `assertionArbiter` | `google/gemini-3.1-pro-preview` | Arbiter for assertion disagreements |
 | `utility` | `google/gemini-2.5-flash` | Data extraction, wait conditions |
+| `cua` | `gpt-5.5` | CUA mode — OpenAI Responses API with the built-in `computer` tool |
 
 ## Caching
 
