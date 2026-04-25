@@ -146,6 +146,30 @@ describe("cua/loop/runCUALoop", () => {
     expect(create).toHaveBeenCalledTimes(4);
   });
 
+  it("uses provided model override instead of getModelId('cua')", async () => {
+    const { page } = makePage();
+    const { client, create } = makeMockClient([
+      {
+        id: "r1",
+        output: [{ type: "message", content: [{ text: "done" }] }],
+      },
+    ]);
+
+    // Sentinel — unique fake string just to prove the override flows into the
+    // request body. Not a real model name.
+    const sentinel = "fake-model-sentinel-for-override-test";
+    await runCUALoop({
+      page: page as unknown as Page,
+      instruction: "noop",
+      maxSteps: 1,
+      client: client as unknown as OpenAI,
+      model: sentinel,
+    });
+
+    const firstArgs = create.mock.calls[0][0];
+    expect(firstArgs.model).toBe(sentinel);
+  });
+
   it("fires onReasoning callback when response includes reasoning items", async () => {
     const { page } = makePage();
     const { client } = makeMockClient([
