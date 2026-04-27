@@ -825,7 +825,7 @@ export const executeWithAutoHealing = async (config: {
 };
 
 export { configure } from "./config";
-export type { EmailProvider, AIOverride, AIGateway, AIMode, ModelConfig } from "./config";
+export type { EmailProvider } from "./config";
 export { emailsinkProvider } from "./providers/emailsink";
 
 export { extractEmailContent, generateEmail } from "./email";
