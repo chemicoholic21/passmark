@@ -318,6 +318,8 @@ describe("runSteps", () => {
 
     expect(generateText).toHaveBeenCalledTimes(2);
     expect(runCUALoop).toHaveBeenCalledTimes(1);
+    const cuaArgs = vi.mocked(runCUALoop).mock.calls[0][0];
+    expect(cuaArgs.gateway).toBe("none");
   });
 
   it("call-level ai option applies to all steps without per-step override", async () => {

@@ -297,6 +297,7 @@ export const runSteps = async ({
               onReasoning: onReasoning
                 ? (reasoning) => onReasoning({ id, reasoning })
                 : undefined,
+              gateway: effectiveAi.gateway,
             }),
         );
       } catch (error: unknown) {
@@ -674,6 +675,7 @@ export const runUserFlow = async ({
             instruction: buildRunUserFlowPromptCUA({ userFlow, steps, assertion }),
             maxSteps: USER_FLOW_MAX_STEPS,
             abortSignal: abortController.signal,
+            gateway: effectiveAi.gateway,
           }),
       );
 
