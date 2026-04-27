@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import type OpenAI from "openai";
-import { type AIGateway, getModelId } from "../config";
+import { getModelId } from "../config";
 import { logger } from "../logger";
 import { waitForDOMStabilization } from "../utils";
 import { executeAction, type ComputerAction } from "./actions";
@@ -18,10 +18,6 @@ export type RunCUALoopOptions = {
   onReasoning?: (reasoning: string) => void;
   /** Optional override client (used by tests). */
   client?: OpenAI;
-  /** Resolved CUA model id. Defaults to `getModelId("cua")` when omitted. */
-  model?: string;
-  /** Resolved gateway for this call. Defaults to "none". */
-  gateway?: AIGateway;
 };
 
 /**
@@ -78,11 +74,9 @@ export async function runCUALoop({
   abortSignal,
   onReasoning,
   client,
-  model: modelOverride,
-  gateway,
 }: RunCUALoopOptions): Promise<string> {
-  const openai = (client ?? getOpenAIClient(gateway ?? "none")) as OpenAIWithResponses;
-  const model = modelOverride ?? getModelId("cua");
+  const openai = (client ?? getOpenAIClient()) as OpenAIWithResponses;
+  const model = getModelId("cua");
 
   // Current (2026) API: gpt-5.5 uses the simpler `{ type: "computer" }` tool.
   // The model infers display dimensions from the screenshots it receives, so
